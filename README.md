@@ -9,6 +9,17 @@ The interface is subject to change.
 ## Example usage with esp-rs
 
 ```rust
+#![no_std]
+#![no_main]
+
+use embedded_hal_bus::spi::AtomicDevice;
+use embedded_hal_bus::util::AtomicCell;
+use esp_backtrace as _;
+use esp_hal::gpio::{Input, InputConfig, Output, OutputConfig};
+use esp_hal::spi::master::Spi;
+use esp_hal::time::Rate;
+use esp_hal::{main, spi};
+
 #[main]
 fn main() -> ! {
     let peripherals =
@@ -53,23 +64,70 @@ fn main() -> ! {
         .with_miso(miso),
     );
 
-    let mut delay = esp_hal::delay::Delay::new();
+    let delay = esp_hal::delay::Delay::new();
 
     let ssd1680_spi = AtomicDevice::new(&spi_bus, cs, delay).unwrap();
-    let mut ssd1680_display = ssd1680_rs::Ssd1680Display::new(
-    rst,
-    dc,
-    busy,
-    delay,
-    ssd1680_spi,
-    ssd1680_rs::DisplayConfig::epd_290_t94()
+    let mut ssd1680_display = ssd1680_rs::SSD1680::new(
+        rst,
+        dc,
+        busy,
+        delay,
+        ssd1680_spi,
+        ssd1680_rs::config::DisplayConfig::epd_290_t94(),
     );
 
-    ssd1680_display.hw_init().unwrap();
-    ssd1680_display.write_bw_byte(0xFF).unwrap();
-    ssd1680_display.full_refresh().unwrap();
-    ssd1680_display.enter_deep_sleep().unwrap();
+    let mut y = 0;
 
-    loop{}
+    loop {
+        ssd1680_display.hw_init().unwrap();
+        ssd1680_display.set_ram_counter_y(y).unwrap();
+        ssd1680_display.write_bw_byte(0xFF).unwrap();
+        ssd1680_display.full_refresh().unwrap();
+        ssd1680_display.enter_deep_sleep().unwrap();
+
+        y += 1;
+        if y > 295 {
+            y = 0;
+        }
+
+        delay.delay_millis(1000);
+    }
 }
+```
+
+Cargo.toml:
+
+```toml
+[package]
+name = "ssd1680-driver-test"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+esp-backtrace = { version = "0.15.1", features = [
+    "esp32c6",
+    "exception-handler",
+    "panic-handler",
+    "println",
+] }
+
+esp-hal = { version = "1.0.0-beta.0", features = ["esp32c6", "unstable"] }
+esp-println = { version = "0.13.1", features = ["esp32c6", "log"] }
+log = { version = "0.4.21" }
+critical-section = "1.2.0"
+embedded-hal-bus = "0.3.0"
+embedded-hal = "1.0.0"
+ssd1680-rs = { branch = "main", git = "https://github.com/nponsard/ssd1680-rs" }
+
+[profile.dev]
+opt-level = "s"
+
+[profile.release]
+codegen-units = 1
+debug = 2
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 's'
+overflow-checks = false
 ```
