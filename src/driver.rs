@@ -145,7 +145,7 @@ where
             VDBMode::VCOM => 0x80,
             VDBMode::HiZ => 0xC0,
             VDBMode::FixLevel(level) => 0x10 | level.into_u8(),
-            VDBMode::GSTransition(follow_lut, lut) => 0 | (follow_lut as u8) << 2 | lut.into_u8(),
+            VDBMode::GSTransition(follow_lut, lut) => ((follow_lut as u8) << 2) | lut.into_u8(),
         };
         self.write_command(SsdCommand::BorderWaveformnControl)?;
         self.write_data(&[data])?;
@@ -161,7 +161,7 @@ where
         bw: UpdateRamOption,
         source_output_mode: bool,
     ) -> Result<(), Error<S, R, D, B>> {
-        let first_byte: u8 = bw as u8 | (red as u8) << 4;
+        let first_byte: u8 = bw as u8 | ((red as u8) << 4);
         let second_byte = (source_output_mode as u8) << 7;
 
         self.write_command(SsdCommand::DisplayUpdateControl1)?;
@@ -196,7 +196,7 @@ where
     ) -> Result<(), Error<S, R, D, B>> {
         let height = if height == 0 { 0 } else { height - 1 };
         self.write_command(SsdCommand::DriveOutputControl)?;
-        let gate_scanning: u8 = tb as u8 | (sm as u8) << 1 | (gd as u8) << 2;
+        let gate_scanning: u8 = tb as u8 | ((sm as u8) << 1) | ((gd as u8) << 2);
         self.write_data(&[height as u8, (height >> 8) as u8, gate_scanning])?;
         Ok(())
     }
@@ -209,7 +209,7 @@ where
         y: bool,
         direction: bool,
     ) -> Result<(), Error<S, R, D, B>> {
-        let sequence: u8 = (x as u8) | (y as u8) << 1 | (direction as u8) << 2;
+        let sequence: u8 = (x as u8) | ((y as u8) << 1) | ((direction as u8) << 2);
         self.write_command(SsdCommand::DataEntryModeSetting)?;
         self.write_data(&[sequence])?;
 
@@ -291,7 +291,7 @@ where
 
         self.write_command(SsdCommand::AutoWriteBWRam)?;
         // TODO: different height and width, here its 296x128
-        let data = (color as u8) << 7 | 0x60 | 0x04;
+        let data = ((color as u8) << 7) | 0x60 | 0x04;
         self.write_data(&[data])?;
         self.wait_for_busy()?;
         Ok(())

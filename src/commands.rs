@@ -49,8 +49,8 @@ pub enum SsdCommand {
     SetRamYCounter = 0x4F,
     Nop = 0x7F,
 }
-impl Into<u8> for SsdCommand {
-    fn into(self) -> u8 {
-        self as u8
+impl From<SsdCommand> for u8 {
+    fn from(val: SsdCommand) -> Self {
+        val as u8
     }
 }

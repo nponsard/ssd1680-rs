@@ -5,9 +5,9 @@ pub enum LUTSelect {
     LUT2 = 0x02,
     LUT3 = 0x03,
 }
-impl Into<u8> for LUTSelect {
-    fn into(self) -> u8 {
-        self as u8
+impl From<LUTSelect> for u8 {
+    fn from(val: LUTSelect) -> Self {
+        val as u8
     }
 }
 impl LUTSelect {
@@ -24,9 +24,9 @@ pub enum VDBLevel {
     VSL = 0x20,
     VSH2 = 0x30,
 }
-impl Into<u8> for VDBLevel {
-    fn into(self) -> u8 {
-        self as u8
+impl From<VDBLevel> for u8 {
+    fn from(val: VDBLevel) -> Self {
+        val as u8
     }
 }
 impl VDBLevel {
@@ -52,9 +52,9 @@ pub enum UpdateRamOption {
     /// Inverse RAM content
     Inverse = 0x8,
 }
-impl Into<u8> for UpdateRamOption {
-    fn into(self) -> u8 {
-        self as u8
+impl From<UpdateRamOption> for u8 {
+    fn from(val: UpdateRamOption) -> Self {
+        val as u8
     }
 }
 
