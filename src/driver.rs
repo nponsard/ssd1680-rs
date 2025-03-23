@@ -95,7 +95,7 @@ where
 
         self.data_entry_mode(true, true, false)?;
 
-        self.set_ram_start_end_x(0, self.config.width - 1)?;
+        self.set_ram_start_end_x(0, self.config.width / 8 - 1)?;
         self.set_ram_start_end_y(0, self.config.height - 1)?;
 
         self.set_border_waveform(self.config.border_waveform_control)?;
